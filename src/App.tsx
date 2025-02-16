@@ -5,8 +5,8 @@ import LoginPage from './pages/login'
 import DashboardPage from './pages/dashboard'
 
 function ProtectedRoute() {
-  const { token } = useAuthContext()
-  if (`` === token) return (<Navigate to="/" />)
+  const { userData } = useAuthContext();
+  if (`` === userData.access_token) return (<Navigate to="/" />)
   return (<Outlet />)
 }
 

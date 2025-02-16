@@ -16,17 +16,39 @@ import { useAuthContext } from "@/contexts/auth"
 export default function LoginPage({
     className,
     ...props
-  }: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div">) {
 
     const [email, setEmail] = useState(``);
-    const [pwd, setPwd] = useState(``);
+    const [password, setPassword] = useState(``);
 
-    const {token} = useAuthContext();
-    if (`` !== token) return (<Navigate to="/dashboard" />)
+    const { userData, setUserData } = useAuthContext();
+    if (`` !== userData.access_token) return (<Navigate to="/dashboard" />)
 
-    function postLogin (e: React.FormEvent<HTMLFormElement>) {
+    function postLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        console.log(Math.random(), {email, pwd});
+        fetch('http://localhost:3000/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const {access_token, refresh_token} = data;
+                if (undefined !== access_token) setUserData({access_token, refresh_token})
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 
     return (
@@ -64,7 +86,7 @@ export default function LoginPage({
                                                 Forgot your password?
                                             </a>
                                         </div>
-                                        <Input id="password" type="password" required value={pwd} onChange={(e) => setPwd(e.target.value)} />
+                                        <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                                     </div>
                                     <Button type="submit" className="w-full">
                                         Login
